@@ -1,0 +1,97 @@
+Лабораторная работа №1. 08.02
+Основное задание:
+Реализовать на любом языке программирования многопоточную симуляцию движения планет.
+Каждая структура или каждый объект планеты должны иметь внутри себя поле, обозначающее скорость
+движения планеты и функцию, которая отвечает за изменение координат планеты.
+Движение каждой планеты должно запускаться в отдельном потоке или отдельном процессе, чтобы добиться
+максимально параллельной работы.
+
+Дополнительное задание:
+Реализовать графический интерфейс, отображающий процесс движения планет.
+
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout
+from PyQt5.QtGui import QPainter, QColor
+from PyQt5.QtCore import Qt, QTimer
+import math
+
+
+class Planet(QWidget):
+    def __init__(self, start_x, start_y):
+        super().__init__()
+
+        self.setWindowTitle('Ellipse Animation')
+        self.setGeometry(100, 100, 600, 400)
+
+        self.start_x = start_x
+        self.start_y = start_y
+
+        layout = QGridLayout()
+        self.setLayout(layout)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update)
+        self.timer.start(50)  # Обновление каждые 50 миллисекунд
+
+        self.angle = 0
+        self.radius_x = 200
+        self.radius_y = 100
+        self.speed_factor = 1.0
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Очистка экрана
+        painter.fillRect(self.rect(), Qt.white)
+
+        # Вычисление координат круга на эллипсе
+        x = round(self.start_x + self.radius_x * math.cos(self.angle))
+        y = round(self.start_y + self.radius_y * math.sin(self.angle))
+
+        # Рисование круга
+        painter.setBrush(QColor(255, 0, 0))
+        painter.drawEllipse(x - 10, y - 10, 20, 20)
+
+        # Увеличение угла для следующего шага анимации
+        self.angle += 0.05 * self.speed_factor
+
+        if self.angle > 6.28:  # Ограничение до полного оборота
+            self.angle = 0
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    window = Planet(300, 200)  # Указываем начальные координаты
+    window.show()
+    sys.exit(app.exec_())
+
+
+# from multiprocessing import Process
+# import random
+# import time
+# from concurrent.futures import ThreadPoolExecutor
+#
+#
+# class Planet:
+#
+#     def __init__(self, sign):
+#         self.speed = 0
+#         self.x = 0
+#         self.y = 0
+#         self.sign = sign
+#
+#     def move(self):
+#         pass
+#
+# if __name__ == '__main__':
+#     earth = Planet('.')
+#     mars = Planet('*')
+#     mercury = Planet(',')
+#
+#     executors_list = []
+#
+#     with ThreadPoolExecutor(max_workers=5) as executor:
+#         executors_list.append(executor.submit(earth.move))
+#         executors_list.append(executor.submit(mars.move))
+#         executors_list.append(executor.submit(mercury.move))
